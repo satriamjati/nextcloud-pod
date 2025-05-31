@@ -1,0 +1,13 @@
+[Unit]
+Description=One-Time Nextcloud Repair
+After=nextcloud-pod.service
+Requires=nextcloud-pod.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=no
+ExecStart=/bin/bash -c "podman exec -it nextcloud-app php occ maintenance:repair --include-expensive;"
+Restart=no
+
+[Install]
+WantedBy=default.target

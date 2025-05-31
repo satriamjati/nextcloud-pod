@@ -1,0 +1,13 @@
+[Unit]
+Description=One-Time Nextcloud Scan
+After=nextcloud-pod.service
+Requires=nextcloud-pod.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=no
+ExecStart=/bin/bash -c "podman exec -it nextcloud-app php occ files:scan --all"
+Restart=no
+
+[Install]
+WantedBy=default.target
