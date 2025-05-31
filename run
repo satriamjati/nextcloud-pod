@@ -1,0 +1,51 @@
+sudo mkdir -p /srv/nextcloud/data
+sudo mkdir -p /srv/nextcloud/db
+sudo mkdir -p /mnt/data/nextcloud
+
+sudo chown -R 100998:100998 /srv/nextcloud/db
+sudo chown -R 100032:100032 /srv/nextcloud/data
+sudo chown -R 100032:100032 /mnt/data/nextcloud
+
+podman pod create --name nextcloud-pod -p 8888:80
+
+podman run -d --replace \
+  --pod nextcloud-pod \
+  --name nextcloud-db \
+  -e POSTGRES_DB=nextcloud \
+  -e POSTGRES_USER=nextcloud \
+  -e POSTGRES_PASSWORD=supersecretpassword \
+  -v /srv/nextcloud/db:/var/lib/postgresql/data \
+  postgres:15
+
+podman build -t nextcloud-custom ./nextcloud-ffmpeg
+
+podman run -d --replace \
+  --pod nextcloud-pod \
+  --name nextcloud-app \
+  --device /dev/dri/card0 \
+  --device /dev/dri/card1 \
+  --device /dev/dri/renderD128 \
+  --device /dev/dri/renderD129 \
+  -v /srv/nextcloud/data:/var/www/html \
+  -v /srv/nas/share/public/iPad/Album:/mnt/ipad/album \
+  -e POSTGRES_HOST=nextcloud-db \
+  -e POSTGRES_DB=nextcloud \
+  -e POSTGRES_USER=nextcloud \
+  -e POSTGRES_PASSWORD=supersecretpassword \
+  nextcloud-custom:latest
+
+podman pod stop nextcloud-pod
+podman pod rm nextcloud-pod
+
+podman stop nextcloud-app nextcloud-db
+podman rm nextcloud-app nextcloud-db
+
+sudo rm -rf /srv/nextcloud
+sudo rm -rf /mnt/data/nextcloud
+
+podman exec -it nextcloud-app php occ files:scan --all
+podman exec -it nextcloud-app php occ files:scan --path="admin/files/Photos"
+podman exec -it nextcloud-app php occ maintenance:repair --include-expensive
+podman exec -it nextcloud-app php occ db:add-missing-indices
+podman exec -it nextcloud-app php occ config:system:set maintenance_window_start --value="3" --type=integer
+podman exec -it nextcloud-app php occ memories:index

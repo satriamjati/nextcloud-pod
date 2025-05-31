@@ -1,0 +1,66 @@
+<?php
+$CONFIG = array (
+  'htaccess.RewriteBase' => '/',
+  'memcache.local' => '\\OC\\Memcache\\APCu',
+  'apps_paths' => 
+  array (
+    0 => 
+    array (
+      'path' => '/var/www/html/apps',
+      'url' => '/apps',
+      'writable' => false,
+    ),
+    1 => 
+    array (
+      'path' => '/var/www/html/custom_apps',
+      'url' => '/custom_apps',
+      'writable' => true,
+    ),
+  ),
+  'upgrade.disable-web' => true,
+  'instanceid' => 'ocw8q8gjzsip',
+  'passwordsalt' => 'FklLx2IqNw9EZBcfI/+5hTHBy5Ef9O',
+  'secret' => 'VnbDG+aUWK3lkNtVtk5C5lbpj+REVLvDHsXRjZAyeOQWkyp3',
+  'trusted_domains' => 
+  array (
+    0 => '192.168.0.100',
+    1 => 'charmy',
+  ),
+  'datadirectory' => '/var/www/html/data',
+  'dbtype' => 'pgsql',
+  'version' => '31.0.5.1',
+  'overwrite.cli.url' => 'http://192.168.0.100/nextcloud',
+  'overwritewebroot' => 'nextcloud',
+  'dbname' => 'nextcloud',
+  'dbhost' => 'nextcloud-db',
+  'dbport' => '',
+  'dbtableprefix' => 'oc_',
+  'dbuser' => 'oc_admin',
+  'dbpassword' => 'dDDIcgE92s8nx2Q7Rm3cYJV6pdHw40',
+  'installed' => true,
+  'memories.db.triggers.fcu' => true,
+  'memories.exiftool' => '/var/www/html/custom_apps/memories/bin-ext/exiftool-amd64-glibc',
+  'memories.vod.path' => '/var/www/html/custom_apps/memories/bin-ext/go-vod-amd64',
+  'maintenance' => false,
+  'enabledPreviewProviders' => 
+  array (
+    0 => 'OC\\Preview\\BMP',
+    1 => 'OC\\Preview\\GIF',
+    2 => 'OC\\Preview\\JPEG',
+    3 => 'OC\\Preview\\Krita',
+    4 => 'OC\\Preview\\MarkDown',
+    5 => 'OC\\Preview\\MP3',
+    6 => 'OC\\Preview\\OpenDocument',
+    7 => 'OC\\Preview\\PNG',
+    8 => 'OC\\Preview\\TXT',
+    9 => 'OC\\Preview\\XBitmap',
+    10 => 'OC\\Preview\\Movies',
+    11 => 'OC\\Preview\\HEIC',
+    12 => 'OC\\Preview\\Image',
+    13 => 'OC\\Preview\\Movie',
+  ),
+  'maintenance_window_start' => 3,
+  'preview_max_x' => 1024,
+  'preview_max_y' => 1024,
+  'preview_max_memory' => 2048,
+);

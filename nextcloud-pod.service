@@ -1,0 +1,38 @@
+[Unit]
+Description=Nextcloud Podman Pod
+After=network.target
+Requires=podman.socket
+
+[Service]
+Restart=always
+ExecStartPre=-/usr/bin/podman pod stop nextcloud-pod
+ExecStartPre=-/usr/bin/podman pod rm nextcloud-pod
+ExecStartPre=/usr/bin/podman pod create --name nextcloud-pod -p 8888:80
+ExecStartPre=/usr/bin/podman run -d --replace --pod nextcloud-pod \
+  --name nextcloud-db \
+  -e POSTGRES_DB=nextcloud \
+  -e POSTGRES_USER=nextcloud \
+  -e POSTGRES_PASSWORD=supersecretpassword \
+  -v /srv/nextcloud/db:/var/lib/postgresql/data \
+  postgres:15
+ExecStart=/usr/bin/podman run -d --replace --pod nextcloud-pod \
+  --name nextcloud-app \
+  --device /dev/dri/card0 \
+  --device /dev/dri/card1 \
+  --device /dev/dri/renderD128 \
+  --device /dev/dri/renderD129 \
+  -v /srv/nextcloud/data:/var/www/html \
+  -v /srv/nas/share/public/iPad/Album:/mnt/ipad/album \
+  -e POSTGRES_HOST=nextcloud-db \
+  -e POSTGRES_DB=nextcloud \
+  -e POSTGRES_USER=nextcloud \
+  -e POSTGRES_PASSWORD=supersecretpassword \
+  nextcloud-custom:latest
+ExecStop=/usr/bin/podman pod stop nextcloud-pod
+ExecStopPost=/usr/bin/podman pod rm nextcloud-pod
+KillMode=process
+TimeoutStopSec=60
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,89 @@
+File Type Support HEIC
+config.sample.php -> enabledPreviewProviders -> config.php
+
+Cron (recommended) - 5 minutes sync
+sudo crontab -e
+*/5 * * * * podman exec -u 33 nextcloud-app php -f /var/www/html/cron.php
+
+
+Memories Preview Generator (old?)
+podman exec -it nextcloud-app php occ config:system:set preview_max_x --value="2048" --type=integer
+podman exec -it nextcloud-app php occ config:system:set preview_max_y --value="2048" --type=integer
+podman exec -it nextcloud-app php occ config:system:set jpeg_quality --value="60" --type=integer
+podman exec -it nextcloud-app php occ config:app:set preview jpeg_quality --value="60" --type=integer
+
+Memories Reset Preview (CAREFUL)
+podman exec -it nextcloud-app rm -rf /var/www/html/data/appdata_*/preview
+podman exec -it nextcloud-app php occ files:scan-app-data
+
+OR go Administration Settings > Administration > Memories > File Support (right side)
+
+FFMPEG install by making new custom image : nextcloud-ffmpeg
+Set FFMPEG:
+usermod -aG video www-data
+
+
+Preview Generator apps from nextcloud
+occ app:install previewgenerator
+occ app:enable previewgenerator
+
+./occ config:app:set --value="64 256" previewgenerator squareSizes
+./occ config:app:set --value="256 2048" previewgenerator squareUncroppedSizes
+./occ config:app:set --value="" previewgenerator widthSizes
+./occ config:app:set --value="" previewgenerator heightSizes
+
+occ preview:generate-all
+occ preview:pre-generate
+
+# Install and enable the previewgenerator app
+podman exec -it nextcloud-app php occ app:install previewgenerator
+podman exec -it nextcloud-app php occ app:enable previewgenerator
+
+# Configure square sizes
+podman exec -it nextcloud-app php occ config:app:set --value="64 256" previewgenerator squareSizes
+podman exec -it nextcloud-app php occ config:app:set --value="256 2048" previewgenerator squareUncroppedSizes
+
+# Optional: Clear width/height sizes (can skip if you want default sizes)
+podman exec -it nextcloud-app php occ config:app:set --value="" previewgenerator widthSizes
+podman exec -it nextcloud-app php occ config:app:set --value="" previewgenerator heightSizes
+
+# Generate previews for all files (this may take a long time)
+podman exec -it nextcloud-app php occ preview:generate-all
+
+# Set up cron or systemd for regular pre-generation (optional)
+podman exec -it nextcloud-app php occ preview:pre-generate
+
+
+Set Reverse Proxy
+/var/www/html/config/config.php
+
+  'trusted_domains' =>
+  array (
+    0 => '192.168.0.100',
+    1 => 'charmy',
+  ),
+  'overwrite.cli.url' => 'http://192.168.0.100/nextcloud',
+  'overwritewebroot' => 'nextcloud',
+
+AND Nginx Reverse Proxy in Shared
+sudo nano /etc/nginx/shared/charmy.conf
+
+    location /nextcloud/ {
+        proxy_pass http://127.0.0.1:8888/;
+
+        # Forward important headers for Nextcloud
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+
+        # WebSocket support (optional)
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        # Make sure paths don't get messed up
+        rewrite ^/nextcloud/(.*)$ /$1 break;
+    }
+
