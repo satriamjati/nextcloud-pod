@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Check for exactly 9 arguments
+if [ "$#" -ne 9 ]; then
+  echo "Usage: $0 user mountPoint storageType authType host smbUser smbPass share remoteSubfolder"
+  echo "Example:"
+  echo "  $0 user1 \"Mount Point\" 'smb' 'password::password' 192.168.1.123 smbuser smbpass \"SMB Share\" \"Remote Subfolder\""
+  exit 1
+fi
+
+# Map arguments
+username="$1"
+shareName="$2"
+type="$3"
+passPlaceholder="$4"
+host="$5"
+smbUser="$6"
+smbPass="$7"
+share="$8"
+root="$9"
+
+# Remove surrounding quotes if needed (just in case)
+shareName=$(echo "$shareName" | sed -e 's/^["'\'']//' -e 's/["'\'']$//')
+type=$(echo "$type" | sed -e 's/^["'\'']//' -e 's/["'\'']$//')
+passPlaceholder=$(echo "$passPlaceholder" | sed -e 's/^["'\'']//' -e 's/["'\'']$//')
+root=$(echo "$root" | sed -e 's/^["'\'']//' -e 's/["'\'']$//')
+
+# Build command
+cmd="podman exec -it nextcloud-app php occ files_external:create"
+[[ "$username" != "global" ]] && cmd="$cmd --user $username"
+cmd="$cmd \"$shareName\" \"$type\" \"$passPlaceholder\" -c \"host=$host\" -c \"share=$share\" -c \"root=$root\" -c \"user=$smbUser\" -c \"password=$smbPass\""
+
+# Show and run the command
+echo "Running: $cmd"
+eval "$cmd"

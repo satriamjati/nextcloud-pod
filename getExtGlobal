@@ -1,0 +1,2 @@
+#!/bin/bash
+podman exec -it nextcloud-app php occ files_external:list

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Check if a username was provided
+if [ -z "$1" ]; then
+  echo "Usage: $0 username"
+  exit 1
+fi
+
+USER=$1
+
+echo "Running commands for user: $USER"
+
+# Example command using $USER
+podman exec -it nextcloud-app php occ files:scan --path="/${USER}/files_external"

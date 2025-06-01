@@ -1,0 +1,2 @@
+./setExtLocal ipad "iPad/Local/camera" "/mnt/ipad/camera"
+./setExtSMB ipad "iPad/SMB/camera" 192.168.1.23 user password sharename "path/to/camera"

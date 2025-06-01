@@ -1,0 +1,76 @@
+cat pass
+
+Install Admin
+podman exec -e OC_PASS=$OC_PASS_ADMIN -it nextcloud-app php occ maintenance:install \
+--database "pgsql" \
+--database-name "nextcloud" \
+--database-user "nextcloud" \
+--database-pass "supersecretpassword" \
+--admin-user "admin" \
+--password-from-env
+
+Set Nextcloud
+podman exec -it nextcloud-app php occ config:system:set maintenance_window_start --value="3"
+podman exec -it nextcloud-app php occ config:system:set trusted_domains 0 --value=charmy
+podman exec -it nextcloud-app php occ config:system:set trusted_domains 1 --value=192.168.0.100
+podman exec -it nextcloud-app php occ config:system:set overwrite.cli.url --value='http://192.168.0.100/nextcloud'
+podman exec -it nextcloud-app php occ config:system:set overwritewebroot --value=nextcloud
+podman exec -it nextcloud-app php occ config:system:set skeletondirectory --value=''
+
+podman exec -it nextcloud-app php occ config:system:set enabledPreviewProviders 0 --value='OC\Preview\Image'
+podman exec -it nextcloud-app php occ config:system:set enabledPreviewProviders 1 --value='OC\Preview\HEIC'
+podman exec -it nextcloud-app php occ config:system:set enabledPreviewProviders 2 --value='OC\Preview\TIFF'
+podman exec -it nextcloud-app php occ config:system:set enabledPreviewProviders 3 --value='OC\Preview\Movie'
+podman exec -it nextcloud-app php occ maintenance:repair --include-expensive
+
+podman exec -it nextcloud-app php occ db:add-missing-indices
+
+podman exec -it nextcloud-app php occ config:app:set password_policy minLength --value=1 && \
+podman exec -it nextcloud-app php occ config:app:set password_policy enforceNonCommonPassword --value=0 && \
+podman exec -it nextcloud-app php occ config:app:set password_policy enforceHaveIBeenPwned --value=0 && \
+podman exec -it nextcloud-app php occ config:app:set password_policy enforceUpperLowerCase --value=0 && \
+podman exec -it nextcloud-app php occ config:app:set password_policy enforceNumericCharacters --value=0 && \
+podman exec -it nextcloud-app php occ config:app:set password_policy enforceSpecialCharacters --value=0 
+
+Add Users
+cat pass
+cat listusers
+
+Set Reverse Proxy NGINX
+cat conf
+
+Install External Storage
+podman exec -it nextcloud-app php occ app:enable files_external
+
+Mount External Storage
+cat listext
+
+Install Memories
+
+podman exec -it nextcloud-app php occ app:install memories
+podman exec -it nextcloud-app php occ occ files:scan
+podman exec -it nextcloud-app php occ occ memories:places-setup
+podman exec -it nextcloud-app php occ occ memories:index
+
+Install Previewgenerator
+
+podman exec -it nextcloud-app php occ app:install previewgenerator
+podman exec -it nextcloud-app php occ app:enable previewgenerator
+
+podman exec -it nextcloud-app php occ config:app:set --value="64 256" previewgenerator squareSizes
+podman exec -it nextcloud-app php occ config:app:set --value="256 2048" previewgenerator squareUncroppedSizes
+podman exec -it nextcloud-app php occ config:system:set preview_max_x --value="2048" --type=integer
+podman exec -it nextcloud-app php occ config:system:set preview_max_y --value="2048" --type=integer
+podman exec -it nextcloud-app php occ config:system:set preview_max_memory --value="2048" --type=integer
+podman exec -it nextcloud-app php occ config:system:set preview_max_filesize_image --value="50" --type=integer
+podman exec -it nextcloud-app php occ config:system:set jpeg_quality --value="60" --type=integer
+podman exec -it nextcloud-app php occ config:app:set preview jpeg_quality --value="60" --type=integer
+
+podman exec -it nextcloud-app php occ files:scan-app-data
+podman exec -it nextcloud-app php occ files:scan --all
+podman exec -it nextcloud-app php occ preview:generate-all
+
+Install cronjob
+crontab -e
+*/5 * * * * podman exec -u www-data nextcloud-app php -f /var/www/html/cron.php
+*/10 * * * * podman exec -it nextcloud-app php occ preview:pre-generate

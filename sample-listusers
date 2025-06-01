@@ -1,0 +1,7 @@
+podman exec -e OC_PASS=$OC_PASS_DEFAULT -it nextcloud-app php occ user:add --password-from-env --display-name="user" --group="users" user
+
+podman exec -it nextcloud-app php occ user:resetpassword user
+
+
+
+

@@ -1,0 +1,7 @@
+#!/bin/bash
+USERS=$(podman exec -it nextcloud-app php occ user:list --output=json | jq -r 'keys[]')
+
+for USER in $USERS; do
+  echo "External storage for user $USER:"
+  podman exec -it nextcloud-app php occ files_external:list $USER
+done

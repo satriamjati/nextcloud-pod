@@ -1,0 +1,12 @@
+sudo setfacl -R -m u:100032:rwx .
+sudo setfacl -R -m d:u:100032:rwx .
+
+sudo setfacl -R -m u:100032:rwx /mnt/data/nas/share
+sudo setfacl -R -m d:u:100032:rwx /mnt/data/nas/share
+
+sudo setfacl -R -m u:100032:rwx /srv/nas/share
+sudo setfacl -R -m d:u:100032:rwx /srv/nas/share
+
+sudo getfacl .
+sudo getfacl /mnt/data/nas/share
+sudo getfacl /srv/nas/share

@@ -1,10 +1,8 @@
 sudo mkdir -p /srv/nextcloud/data
 sudo mkdir -p /srv/nextcloud/db
-sudo mkdir -p /mnt/data/nextcloud
 
 sudo chown -R 100998:100998 /srv/nextcloud/db
 sudo chown -R 100032:100032 /srv/nextcloud/data
-sudo chown -R 100032:100032 /mnt/data/nextcloud
 
 podman pod create --name nextcloud-pod -p 8888:80
 
@@ -27,7 +25,8 @@ podman run -d --replace \
   --device /dev/dri/renderD128 \
   --device /dev/dri/renderD129 \
   -v /srv/nextcloud/data:/var/www/html \
-  -v /srv/nas/share/public/iPad/Album:/mnt/ipad/album \
+  -v /srv/nas/share:/mnt/1 \
+  -v /mnt/data/nas/share:/mnt/2 \
   -e POSTGRES_HOST=nextcloud-db \
   -e POSTGRES_DB=nextcloud \
   -e POSTGRES_USER=nextcloud \
