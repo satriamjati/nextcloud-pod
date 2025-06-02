@@ -1,1 +1,4 @@
 hw accel, geotagging, face recognition
+
+multiple file sharing, probably need tailscale funnel later
+https://docs.nextcloud.com/server/19/developer_manual/app/settings.html

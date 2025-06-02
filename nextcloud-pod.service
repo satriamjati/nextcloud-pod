@@ -27,6 +27,9 @@ ExecStart=/usr/bin/podman run -d --replace --pod nextcloud-pod \
   -e POSTGRES_DB=nextcloud \
   -e POSTGRES_USER=nextcloud \
   -e POSTGRES_PASSWORD=supersecretpassword \
+  -e PHP_MEMORY_LIMIT=2048M \
+  -e PHP_UPLOAD_LIMIT=2048M \
+  -e PHP_OPCACHE_MEMORY_CONSUMPTION=256 \
   nextcloud-custom:latest
 ExecStop=/usr/bin/podman pod stop nextcloud-pod
 ExecStopPost=/usr/bin/podman pod rm nextcloud-pod
