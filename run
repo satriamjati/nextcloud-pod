@@ -4,6 +4,9 @@ sudo mkdir -p /srv/nextcloud/db
 sudo chown -R 100998:100998 /srv/nextcloud/db
 sudo chown -R 100032:100032 /srv/nextcloud/data
 
+sudo setfacl -R -m u:100032:rwx /srv/nextcloud
+sudo setfacl -R -m d:u:100032:rwx /srv/nextcloud
+
 podman pod create --name nextcloud-pod -p 8888:80
 
 podman run -d --replace \
