@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Determine mode (3 args vs 2 args)
+if [ "$#" -eq 3 ]; then
+    NEXTCLOUD_HOST=$1
+    USER=$2
+    PASSWORD=$3
+elif [ "$#" -eq 2 ]; then
+    NEXTCLOUD_HOST="http://192.168.0.100/nextcloud"
+    USER=$1
+    PASSWORD=$2
+else
+    echo "Usage: $0 [<nextcloudhost>] <user> <password>"
+    echo "If <nextcloudhost> is omitted, defaults to http://192.168.0.100/nextcloud"
+    exit 1
+fi
+
+# Run the curl command
+echo "Logging into WebDAV at $NEXTCLOUD_HOST as $USER..."
+curl -u "$USER:$PASSWORD" "$NEXTCLOUD_HOST/remote.php/dav/files/$USER/" 
