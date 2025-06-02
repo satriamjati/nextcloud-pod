@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Check for exactly 9 arguments
+if [ "$#" -ne 3 ]; then
+  echo "Usage: $0 user mountPoint remoteSubfolder"
+  echo "Example:"
+  echo "  $0 user1 \"Mount Point\" \"Remote Subfolder\""
+  exit 1
+fi
+
+# Map arguments
+username="$1"
+shareName="$2"
+root="$3"
+
+# Remove surrounding quotes if needed (just in case)
+shareName=$(echo "$shareName" | sed -e 's/^["'\'']//' -e 's/["'\'']$//')
+root=$(echo "$root" | sed -e 's/^["'\'']//' -e 's/["'\'']$//')
+
+# Build command
+cmd="podman exec -it nextcloud-app php occ files_external:create"
+[[ "$username" != "global" ]] && cmd="$cmd --user $username"
+cmd="$cmd \"$shareName\" \"local\" \"null::null\" -c \"datadir=$root\""
+
+# Show and run the command
+echo "Running: $cmd"
+eval "$cmd"

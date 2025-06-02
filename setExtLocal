@@ -17,11 +17,21 @@ root="$3"
 shareName=$(echo "$shareName" | sed -e 's/^["'\'']//' -e 's/["'\'']$//')
 root=$(echo "$root" | sed -e 's/^["'\'']//' -e 's/["'\'']$//')
 
-# Build command
-cmd="podman exec -it nextcloud-app php occ files_external:create"
-[[ "$username" != "global" ]] && cmd="$cmd --user $username"
-cmd="$cmd \"$shareName\" \"local\" \"null::null\" -c \"datadir=$root\""
+# Build and run the create command
+echo "Creating external storage..."
+output=$(podman exec -i nextcloud-app php occ files_external:create "$shareName" "local" "null::null" -c "datadir=$root")
+echo "$output"
 
-# Show and run the command
-echo "Running: $cmd"
-eval "$cmd"
+# Extract the mount ID
+MOUNT_ID=$(echo "$output" | tr -d '\r' | grep -oE '[0-9]+$')
+
+# If not global, add user to the mount
+if [ "$username" != "global" ]; then
+  echo "Adding user '$username' to mount ID $MOUNT_ID..."
+  podman exec -i nextcloud-app php occ files_external:applicable --add-user="$username" "$MOUNT_ID"
+
+  echo "Enabling sharing for mount ID $MOUNT_ID..."
+  podman exec -i nextcloud-app php occ files_external:option "$MOUNT_ID" enable_sharing true
+fi
+
+echo "Done."

@@ -1,15 +1,22 @@
-cat pass
+echo "Install Nextcloud"
+source ./run
 
-Install Admin
-podman exec -e OC_PASS=$OC_PASS_ADMIN -it nextcloud-app php occ maintenance:install \
+echo "Set Password"
+source ./pass
+
+echo "Waiting Nextcloud to Run Correctly"
+sleep 10
+
+echo "Install Admin"
+podman exec -it nextcloud-app php occ maintenance:install \
 --database "pgsql" \
 --database-name "nextcloud" \
 --database-user "nextcloud" \
 --database-pass "supersecretpassword" \
 --admin-user "admin" \
---password-from-env
+--admin-pass "$OC_PASS_ADMIN"
 
-Set Nextcloud
+echo "Set Nextcloud"
 podman exec -it nextcloud-app php occ config:system:set maintenance_window_start --value="3"
 podman exec -it nextcloud-app php occ config:system:set trusted_domains 0 --value=charmy
 podman exec -it nextcloud-app php occ config:system:set trusted_domains 1 --value=192.168.0.100
@@ -32,27 +39,24 @@ podman exec -it nextcloud-app php occ config:app:set password_policy enforceUppe
 podman exec -it nextcloud-app php occ config:app:set password_policy enforceNumericCharacters --value=0 && \
 podman exec -it nextcloud-app php occ config:app:set password_policy enforceSpecialCharacters --value=0 
 
-Add Users
-cat pass
-cat listusers
+echo "Add Users"
+source ./listusers
 
-Set Reverse Proxy NGINX
-cat conf
+echo "Set Reverse Proxy NGINX manually: cat conf"
 
-Install External Storage
+echo "Install External Storage"
 podman exec -it nextcloud-app php occ app:enable files_external
 
-Mount External Storage
-cat listext
+echo "Mount External Storage"
+source ./listext
 
-Install Memories
+echo "Install Memories"
 
 podman exec -it nextcloud-app php occ app:install memories
-podman exec -it nextcloud-app php occ occ files:scan
-podman exec -it nextcloud-app php occ occ memories:places-setup
-podman exec -it nextcloud-app php occ occ memories:index
+podman exec -it nextcloud-app php occ memories:places-setup
+podman exec -it nextcloud-app php occ memories:index
 
-Install Previewgenerator
+echo "Install Previewgenerator"
 
 podman exec -it nextcloud-app php occ app:install previewgenerator
 podman exec -it nextcloud-app php occ app:enable previewgenerator
@@ -66,11 +70,8 @@ podman exec -it nextcloud-app php occ config:system:set preview_max_filesize_ima
 podman exec -it nextcloud-app php occ config:system:set jpeg_quality --value="60" --type=integer
 podman exec -it nextcloud-app php occ config:app:set preview jpeg_quality --value="60" --type=integer
 
-podman exec -it nextcloud-app php occ files:scan-app-data
 podman exec -it nextcloud-app php occ files:scan --all
 podman exec -it nextcloud-app php occ preview:generate-all
 
-Install cronjob
-crontab -e
-*/5 * * * * podman exec -u www-data nextcloud-app php -f /var/www/html/cron.php
-*/10 * * * * podman exec -it nextcloud-app php occ preview:pre-generate
+echo "Install cronjob"
+source ./cron

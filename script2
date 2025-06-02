@@ -1,0 +1,3 @@
+source ./script1   # Or . ./script1.sh
+# hello
+echo "$MY_VAR"        # Now it has the value

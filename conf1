@@ -1,0 +1,5 @@
+podman exec -it nextcloud-app php occ files:scan --all
+podman exec -it nextcloud-app php occ files:scan --path="admin/files/Photos"
+podman exec -it nextcloud-app php occ maintenance:repair --include-expensive
+podman exec -it nextcloud-app php occ db:add-missing-indices
+podman exec -it nextcloud-app php occ config:system:set maintenance_window_start --value="3" --type=integer

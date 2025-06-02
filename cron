@@ -1,0 +1,8 @@
+CRON_JOB1="*/5 * * * * podman exec -u www-data nextcloud-app php -f /var/www/html/cron.php"
+CRON_JOB2="*/10 * * * * podman exec -it nextcloud-app php occ preview:pre-generate"
+
+# Check if first cron job exists, if not append
+(crontab -l 2>/dev/null | grep -F -q "$CRON_JOB1") || (crontab -l 2>/dev/null; echo "$CRON_JOB1") | crontab -
+
+# Check if second cron job exists, if not append
+(crontab -l 2>/dev/null | grep -F -q "$CRON_JOB2") || (crontab -l 2>/dev/null; echo "$CRON_JOB2") | crontab -
