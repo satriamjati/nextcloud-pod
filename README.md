@@ -12,6 +12,9 @@ Installation
 - ./build
 - ./install
 
+Post-config
+- `./loguser` or `./listlog` or manually log one or more users (possibly all needed) to avoid external storage not initialized
 
-Note: 
-Sometimes external storages are not initialized automatically, hence not found in files:scan. You can fix this by logging user in manually or use `./loguser`. Then file scan and generate preview again: `./scan && ./generate`. In some cases, you may need to log more than a user, use `listlog` for multiple login. If there is any other error, try `./fixperms` before try reinstalling.
+Troubleshoot:
+- `./fixperms` 
+- `./stop && ./run`
